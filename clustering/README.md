@@ -8,5 +8,5 @@ Text document clustring pipeline built on part of experiment results of Project 
 	2. Type of model for clustering (supervised/ unsupervised)
 	3. Number of clusters
 
-	`$ python clustering.py file_path unsupervised 30`
+	For example: `$ python clustering.py file_path unsupervised 30`
 * `MTokenizer.py` is used in refining input text content, all credit to [Mayank Kejriwal](http://usc-isi-i2.github.io/kejriwal/).
