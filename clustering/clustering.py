@@ -107,10 +107,10 @@ def textClean(name_list):
     docRE = {}
     for file_name in name_list:
         file = json.loads(open(path + file_name).read())
-        if file['situationFrame']['entities'] != None:
-            docE[file['uuid']] = lowerList(file['situationFrame']['entities'])
+        if file['loreleiJSONMapping']['wordcloud'] != None:
+            docE[file['uuid']] = lowerList(file['loreleiJSONMapping']['wordcloud'])
             refinedE = []
-            for entity in lowerList(file['situationFrame']['entities']):
+            for entity in lowerList(file['loreleiJSONMapping']['wordcloud']):
                 refinedE += MTokenizer.MTokenizer.tokenize_string(entity)
             docRE[file['uuid']] = list(set(refinedE))
     print 'Finish cleaning data...'
@@ -206,7 +206,7 @@ def getGT(path):
     return groundTruth
 
 def getAffinity(graphEmb):
-    print 'Getting affinity matrix for supervised model...'
+    print 'Getting affinity matrix for supervised model (which takes very long time)...'
     docFeatureList = []
     pos_data = {}
     neg_data = {}
