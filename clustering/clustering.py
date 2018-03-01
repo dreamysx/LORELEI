@@ -219,10 +219,11 @@ def getAffinity(graphEmb):
         curDoc = [id, graphEmb[uuid]]
         docFeatureList.append(str(curDoc))
         id += 1
-    with open('docidRef.json', 'w'):
+    with open('docidRef.json', 'w') as f:
         f.write(json.dumps(docidRef))
-    with open('iddocRef.json', 'w'):
+    with open('iddocRef.json', 'w') as f:
         f.write(json.dumps(iddocRef))
+    # print 'start'
     for i in range(len(docFeatureList)):
         for j in range(i+1, len(docFeatureList)):
             left = eval(docFeatureList[i])
@@ -230,9 +231,12 @@ def getAffinity(graphEmb):
             if (checkRelevance(iddocRef[left[0]], iddocRef[right[0]])):
                 key = [left[0], right[0]]
                 pos_data[str(key)] = left[1] + right[1]
+                print pos_data
             else:
                 key = [left[0], right[0]]
                 neg_data[str(key)] = left[1] + right[1]
+                print neg_data
+    # print 'end'
     pos_dataset = dic2List(pos_data)
     neg_dataset = dic2List(neg_data)
     num_pos_sample = int(0.3 * len(pos_dataset))
@@ -248,9 +252,8 @@ def getAffinity(graphEmb):
 
     reg = RFC(n_estimators=50, max_features='log2')
     model = reg.fit(train_X, train_y)
-    print 'model ready!'
 
-    print 'get affinity matrix...'
+    print 'Getting affinity matrix...'
     matrixVal = {}
     for item in posPicked:
         matrixVal[str(item.keys()[0])] = 1
@@ -388,12 +391,11 @@ def tsneVis(result):  # this will generate a .png file showing visualization of 
 
 if __name__ == "__main__":
     path = sys.argv[1] #'/Users/dreamysx/Documents/USC-DTIN/isi/reliefWebProcessed/' #
-    # dwFeature()
+    dwFeature(path)
     modelType = sys.argv[2] #'supervised' #'unsupervised' #
     numClu = sys.argv[3] #30  #
     features = open('graph.embeddings').readlines()[1:]
-    # graphIddocRef = json.loads(open('graphIddocRef.json').read())
-    graphIddocRef = json.loads(open('docidRef.json').read())
+    graphIddocRef = json.loads(open('graphIddocRef.json').read())
     graphEmb = {}
 
     for line in features:
