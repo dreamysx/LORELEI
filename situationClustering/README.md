@@ -3,8 +3,8 @@ Situation clustering aims at clustering documents based on real world informatio
 This first version is developed for dataset **ll_Nepal** only, and clustering is based on location and topic information.
 
 ### Explain ll_Nepal
-* **Topic information** comes from field `topics` of sample data, 9498 out of 29946 documents have this field.
-* **Location information** comes from field `geoLocations`/`geohash`, 24834 out of 29946 documents have this field. Sample data also have a field `LOC`, basically each `LOC` value is corresponding to a `geohash` value. But, only 5384 out of 29946 documents have `LOC`. So, we choose `geohash` over `LOC` to represent location information.
+* **Topic information** comes from field `topics` of sample data, 9498 out of 29946 documents have this field, totally 11 kinds of topics.
+* **Location information** comes from field `geoLocations`/`geohash`, 24834 out of 29946 documents have this field, totally 346 kinds of locations. Sample data also have a field `LOC`, basically each `LOC` value is corresponding to a `geohash` value. But, only 5384 out of 29946 documents have `LOC`. So, we choose `geohash` over `LOC` to represent location information.
 * All the documents are in **json** format.
 
 ### Usage
