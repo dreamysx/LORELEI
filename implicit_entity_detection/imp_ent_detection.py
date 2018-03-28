@@ -192,28 +192,35 @@ def doc_entity_reverse(entity_doc):
             doc_entity[doc].append(entity)
     return doc_entity
 
-def dot_product_top(docEmb, entEmb, doc, known_entities, candidate_entities, top):
+def dot_product_top(docEmb, entEmb, doc, known_entities, candidate_entities, top_k, method='dot_product_mean'):
     top_res = []
     temp_res = {}
     doc_feature = docEmb[doc]
-    total_dis = 0
-    total_count = 0
-    for entity in known_entities:
-        entity_feature = entEmb[entity]
-        total_dis += np.dot(doc_feature, entity_feature)
-        total_count += 1
-    avg_dis = total_dis/ total_count
-    for entity in candidate_entities:
-        entity_feature = entEmb[entity]
-        temp_res[entity] = abs(np.dot(doc_feature, entity_feature) - avg_dis)
+    if method == 'dot_product_mean':
+        print 'dot_product_mean'
+        total_dis = 0
+        total_count = 0
+        for entity in known_entities:
+            entity_feature = entEmb[entity]
+            total_dis += np.dot(doc_feature, entity_feature)
+            total_count += 1
+        avg_dis = total_dis / total_count
+        print avg_dis
+        for entity in candidate_entities:
+            entity_feature = entEmb[entity]
+            temp_res[entity] = abs(np.dot(doc_feature, entity_feature) - avg_dis)
+    elif method == 'dot_product_doc':
+        for entity in candidate_entities:
+            entity_feature = entEmb[entity]
+            temp_res[entity] = abs(np.dot(doc_feature, entity_feature))
     ranking_res = sorted(temp_res.items(), key=operator.itemgetter(1))
     with open('implicit_entity/ranking_res/'+doc+'.json', 'w') as f:
         f.write(json.dumps(ranking_res))
-    for pair in ranking_res[:top]:
+    for pair in ranking_res[:top_k]:
         top_res.append(pair[0])
     return top_res
 
-def ranking(docEmb, entEmb, method='dot_product_mean'):
+def ranking(docEmb, entEmb, method='dot_product_mean', top_k=10):
     training = json.loads(open('implicit_entity/training.json').read())
     testing = json.loads(open('implicit_entity/testing.json').read())
     training_doc_entities = doc_entity_reverse(training)
@@ -235,33 +242,29 @@ def ranking(docEmb, entEmb, method='dot_product_mean'):
     entities = training.keys()
     doc_entities_ranking = {}
     for doc in testing_doc_entities:
-        left = 10 - len(training_doc_entities[doc])
-        if left <= 0:
-            doc_entities_ranking[doc] = []
-            continue
-        else:
-            known_entities = training_doc_entities[doc]
-            cand_entities = []
-            for entity in entities:
-                if entity not in known_entities:
-                    cand_entities.append(entity)
-            if method == 'dot_product_mean':
-                doc_entities_ranking[doc] = dot_product_top(docEmb, entEmb, doc, known_entities, cand_entities, left)
+        known_entities = training_doc_entities[doc]
+        cand_entities = []
+        for entity in entities:
+            if entity not in known_entities:
+                cand_entities.append(entity)
+        doc_entities_ranking[doc] = dot_product_top(docEmb, entEmb, doc, known_entities, cand_entities, top_k, method)
     with open('implicit_entity/ranking_top.json', 'w') as f:
         f.write(json.dumps(doc_entities_ranking))
 
     return doc_entities_ranking
 
-def exe(file_path, threshold=3, training_portion=0.9):
+def exe(file_path, threshold=3, training_portion=0.9, method='dot_product_mean', top_k=10):
     name_list = os.listdir(file_path)
-    buildEdgeList(name_list, threshold)
-    dwFeature(training_portion)  # 0.9 then round down
+    # buildEdgeList(name_list, threshold)
+    # dwFeature(training_portion)  # 0.9 then round down
     features = open('implicit_entity/graph.embeddings').readlines()[1:]
     (docEmb, entEmb) = embedding_process(features)
-    ranking(docEmb, entEmb)
+    ranking(docEmb, entEmb, method, top_k)
 
 if __name__ == "__main__":
     path = sys.argv[1] # '/Users/dreamysx/Documents/USC-DTIN/isi/reliefWebProcessed/'  #
     threshold = eval(sys.argv[2]) # 3 #
     training_portion = eval(sys.argv[3]) # 0.9 #
-    exe(path, threshold, training_portion)
+    method = sys.argv[4] # 'dot_product_mean' #
+    top_k = eval(sys.argv[5])# 10 #
+    exe(path, threshold, training_portion, method, top_k)
